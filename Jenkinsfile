@@ -38,5 +38,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Run Docker Container') {
+            steps {
+                sh '''
+                # Зупиняємо старий контейнер, якщо він існує
+                docker rm -f hello-java || true
+        
+                # Запускаємо новий контейнер
+                docker run -d -p 8085:8080 --name hello-java hello-java:latest
+                '''
+            }
+        }
     }
 }
