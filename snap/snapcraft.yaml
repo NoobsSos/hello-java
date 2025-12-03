@@ -1,0 +1,111 @@
+# snapcraft.yaml - builds a Snap package of the Java applications
+# Copyright (C) 2020-2024 John Neffenger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+name: hello-java
+title: Hello Java!
+summary: Sample Java Swing and console applications
+description: |
+  This project is my template for building and packaging Java
+  applications. It follows the conventions of Apache Maven for its
+  directory structure and includes two sample applications that print
+  "Hello World!" to standard output:
+
+  - a Java console application with a command-line interface, and
+  - a Java Swing application with a graphical user interface.
+
+  For more information, including the source code and build files,
+  see the README file for this project on GitHub:
+
+  https://github.com/jgneff/hello-java
+
+  Java and OpenJDK are trademarks or registered trademarks of Oracle
+  and/or its affiliates.
+
+version: git
+license: GPL-3.0+
+
+base: core20
+grade: stable
+confinement: strict
+
+architectures:
+- build-on: amd64
+- build-on: arm64
+- build-on: armhf
+- build-on: ppc64el
+- build-on: s390x
+
+apps:
+  hello-java:
+    command: bin/HelloSwing
+    environment:
+      LC_ALL: C.UTF-8
+    plugs:
+    - desktop
+    - desktop-legacy
+    - wayland
+    - x11
+  console:
+    command: bin/HelloWorld
+    environment:
+      LC_ALL: C.UTF-8
+  java:
+    command: bin/java
+    environment:
+      LC_ALL: C.UTF-8
+
+parts:
+  # Installs the staged packages in their own part so that the Makefile can
+  # remove $DESTDIR before running 'jlink'; otherwise, the build fails:
+  #   + make -j4 install DESTDIR=/root/parts/app/install
+  #   Error: directory already exists: /root/parts/app/install
+  lib:
+    plugin: nil
+    # Adds Snapcraft list of missing libraries plus libfontconfig1
+    stage-packages:
+    - libasound2
+    - libfreetype6
+    - libgif7
+    - libgraphite2-3
+    - libharfbuzz0b
+    - libjpeg-turbo8
+    - liblcms2-2
+    - libpng16-16
+    - libx11-6
+    - libxext6
+    - libxi6
+    - libxrender1
+    - libxtst6
+    - libfontconfig1
+
+  app:
+    after: [lib]
+    plugin: make
+    source: .
+    source-type: local
+    build-packages: [openjdk-21-jdk-headless]
+
+  del:
+    after: [app]
+    plugin: nil
+    # Deletes files and links already available in the base snap
+    override-prime: |
+      set -o xtrace
+      cd $SNAPCRAFT_PRIME
+      base=/snap/core20/current
+      find * -type f -exec test -f "$base/{}" \; -delete
+      find * -type l -exec test -L "$base/{}" \; -delete
+      find * -type d -empty -exec test -d "$base/{}" \; -delete

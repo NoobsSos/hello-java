@@ -1,0 +1,12 @@
+# Apache Maven
+/org.status6.hello.swing/target/
+/org.status6.hello.world/target/
+
+# GNU Make
+/build/
+/dist/
+
+# Snapcraft
+/*.snap
+/*.txt
+/prime/
