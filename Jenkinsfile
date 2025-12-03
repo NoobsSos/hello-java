@@ -29,11 +29,13 @@ pipeline {
 
         stage('Push to Nexus Docker Registry') {
             steps {
-                sh '''
-                docker tag hello-java:latest localhost:5000/hello-java:latest
-                docker push localhost:5000/hello-java:latest
-                '''
-            }
+                withCredentials([usernamePassword(credentialsId: 'nexus-creds', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh '''
+                    echo $PASS | docker login localhost:5000 -u $USER --password-stdin
+                    docker tag hello-java:latest localhost:5000/hello-java:latest
+                    docker push localhost:5000/hello-java:latest
+                    '''
         }
     }
+}
 }
