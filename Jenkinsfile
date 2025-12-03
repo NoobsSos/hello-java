@@ -35,7 +35,8 @@ pipeline {
                     docker tag hello-java:latest localhost:5000/hello-java:latest
                     docker push localhost:5000/hello-java:latest
                     '''
+                }
+            }
         }
     }
-}
 }
